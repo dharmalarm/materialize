@@ -1,505 +1,506 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="page-title">Loading...</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="config.js"></script>
-<style>
-  :root {
-    --bg: #FDF6EE;
-    --surface: #FFFCF8;
-    --surface2: #F2E8DA;
-    --border: #E0D0BC;
-    --text: #2A1F14;
-    --text-muted: #7A6555;
-    --accent: #9B3A1A;
-    --accent-light: #F5E6DF;
-    --accent2: #3A6B3A;
-    --accent2-light: #DFF0DF;
-    --mono: 'DM Mono', monospace;
-    --serif: 'DM Serif Display', serif;
-    --sans: 'DM Sans', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-
-  header { background: var(--text); color: var(--bg); padding: 0 24px; display: flex; align-items: center; height: 60px; position: sticky; top: 0; z-index: 100; gap: 10px; }
-  .logo { font-family: var(--serif); font-size: 1.25rem; letter-spacing: 0.02em; color: var(--bg); }
-  .logo span { color: #D4845A; }
-  .logo-sub { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: #A08878; margin-top: 2px; }
-
-  nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; position: sticky; top: 60px; z-index: 99; }
-  nav::-webkit-scrollbar { display: none; }
-  .nav-btn { flex-shrink: 0; padding: 14px 20px; font-family: var(--sans); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .nav-btn:hover { color: var(--text); }
-  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  main { flex: 1; padding: 24px 16px; max-width: 900px; margin: 0 auto; width: 100%; }
-  .view { display: none; }
-  .view.active { display: block; }
-
-  .view-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
-  .view-title { font-family: var(--serif); font-size: 1.8rem; color: var(--text); }
-
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 6px; font-family: var(--sans); font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: #7A2D14; }
-  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .btn-secondary:hover { background: var(--border); }
-  .btn-ghost { background: none; color: var(--text-muted); padding: 6px 10px; border: none; cursor: pointer; border-radius: 6px; font-size: 0.85rem; font-family: var(--sans); font-weight: 500; }
-  .btn-ghost:hover { color: var(--accent); background: var(--accent-light); }
-  .btn-danger { background: none; color: #B03030; padding: 6px 10px; border: none; cursor: pointer; border-radius: 6px; font-size: 0.85rem; font-family: var(--sans); }
-  .btn-danger:hover { background: #FDE8E8; }
-  .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
-
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.15s; }
-  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-  .card-top { display: flex; align-items: center; padding: 14px 16px; gap: 10px; }
-  .card-info { flex: 1; min-width: 0; cursor: pointer; }
-  .card-title { font-weight: 600; font-size: 0.95rem; }
-  .card-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; font-family: var(--mono); }
-  .card-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
-  .card-body { display: none; padding: 12px 16px 14px; border-top: 1px solid var(--surface2); }
-  .card-body.open { display: block; }
-  .caret { font-size: 0.7rem; color: var(--text-muted); transition: transform 0.2s; display: inline-block; cursor: pointer; padding: 6px; }
-  .caret.open { transform: rotate(90deg); }
-
-  .menu-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
-  @media (min-width: 640px) { .menu-grid { grid-template-columns: 1fr 1fr; } }
-  .menu-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
-  .menu-tile:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #C8A898; }
-  .menu-tile-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-  .menu-tile-name { font-family: var(--serif); font-size: 1.15rem; color: var(--text); line-height: 1.2; }
-  .menu-tile-arrow { color: var(--text-muted); font-size: 1rem; margin-top: 2px; }
-  .menu-tile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .menu-stat { background: var(--surface2); border-radius: 8px; padding: 10px 12px; }
-  .menu-stat-val { font-family: var(--serif); font-size: 1.15rem; color: var(--accent); }
-  .menu-stat-lbl { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
-  .menu-tile-recipes { font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; }
-
-  .detail-back { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-  .detail-title { font-family: var(--serif); font-size: 1.8rem; color: var(--text); }
-  .detail-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
-  .detail-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-  .detail-stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); }
-  .detail-stat-lbl { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
-  .detail-actions { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
-  .detail-edit-panel { background: var(--accent-light); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; display: none; }
-  .detail-edit-panel.open { display: block; }
-  .detail-edit-panel h3 { font-family: var(--serif); font-size: 1.1rem; color: var(--accent); margin-bottom: 14px; }
-
-  .estimator-back { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-  .estimator-menu-name { font-family: var(--serif); font-size: 1.6rem; color: var(--text); }
-
-  .form-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
-  .form-panel h3 { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 16px; color: var(--text); }
-  .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-  .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
-  .form-group label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
-  input, select, textarea { font-family: var(--sans); font-size: 0.88rem; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
-  textarea { resize: vertical; min-height: 70px; }
-
-  .ing-row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--surface2); }
-  .ing-row:last-child { border-bottom: none; }
-  .section-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
-
-  .est-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  .est-table th { text-align: left; padding: 8px 10px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); }
-  .est-table td { padding: 10px 10px; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
-  .est-table tr:last-child td { border-bottom: none; }
-  .est-table .num { font-family: var(--mono); text-align: right; font-size: 0.83rem; }
-  .est-table tfoot td { font-weight: 600; background: var(--surface2); border-top: 2px solid var(--border); }
-  .qty-input { width: 65px; text-align: center; font-family: var(--mono); font-size: 0.88rem; padding: 5px 6px; }
-  .cost-better { color: var(--accent2); font-weight: 600; }
-  .sweet-spot { font-size: 0.75rem; margin-top: 4px; padding: 3px 8px; border-radius: 4px; display: inline-block; }
-  .sweet-spot.hint { background: #FFF4E0; color: #8B5C00; border: 1px solid #F0D080; }
-  .sweet-spot.optimal { background: var(--accent2-light); color: var(--accent2); border: 1px solid #A8D8A8; }
-
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-  .summary-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
-  .summary-box .val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); }
-  .summary-box .lbl { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
-
-  .menu-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-  .menu-selector label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
-  .menu-selector select { max-width: 260px; flex: 1; }
-  .shop-item { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--surface2); font-size: 0.88rem; }
-  .shop-item:last-child { border-bottom: none; }
-  .shop-qty { font-family: var(--mono); font-size: 0.82rem; color: var(--accent); font-weight: 500; white-space: nowrap; margin-left: 12px; }
-
-  .empty { text-align: center; padding: 48px 24px; color: var(--text-muted); }
-  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
-  .empty p { font-size: 0.88rem; margin-top: 6px; }
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-  .storage-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 8px 16px; font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .storage-bar strong { color: var(--accent2); }
-
-  @media (max-width: 500px) {
-    .view-title, .detail-title { font-size: 1.4rem; }
-    .summary-box .val { font-size: 1.2rem; }
-    .est-table th, .est-table td { padding: 7px 5px; font-size: 0.75rem; }
-    .qty-input { width: 52px; }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <div>
-    <div class="logo" id="header-logo"></div>
-    <div class="logo-sub" id="header-tagline"></div>
-  </div>
-</header>
-
-<div class="storage-bar">
-  <span>💾 <strong>Auto-saving</strong> to this browser</span>
-  <button class="btn-ghost btn-sm" onclick="clearAllData()" style="font-size:0.72rem;padding:3px 8px;">Reset to defaults</button>
-</div>
-
-<nav>
-  <button class="nav-btn active" onclick="showView('ingredients', this)">Ingredients</button>
-  <button class="nav-btn" onclick="showView('recipes', this)">Recipes</button>
-  <button class="nav-btn" onclick="showView('menus', this)">Menus</button>
-  <button class="nav-btn" onclick="showView('shopping', this)">Shopping List</button>
-</nav>
-
-<main>
-
-<!-- INGREDIENTS -->
-<div id="view-ingredients" class="view active">
-  <div class="view-header">
-    <div class="view-title">Ingredients</div>
-    <button class="btn btn-primary" onclick="openIngForm()">+ Add Ingredient</button>
-  </div>
-  <div class="form-panel" id="ingForm" style="display:none">
-    <h3 id="ingFormTitle">New Ingredient</h3>
-    <input type="hidden" id="ing-edit-id">
-    <div class="form-row">
-      <div class="form-group" style="flex:3"><label>Name</label><input id="ing-name" type="text" placeholder="e.g. All-Purpose Flour"></div>
-      <div class="form-group" style="flex:2"><label>Unit of Measure</label><input id="ing-uom" type="text" placeholder="e.g. cup, tsp, oz"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Package Size (in UoM)</label><input id="ing-size" type="number" placeholder="e.g. 18.9" min="0" step="any"></div>
-      <div class="form-group"><label>Package Price ($)</label><input id="ing-price" type="number" placeholder="e.g. 1.97" min="0" step="0.01"></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn btn-primary" onclick="saveIngredient()">Save</button>
-      <button class="btn btn-secondary" onclick="closeIngForm()">Cancel</button>
-    </div>
-  </div>
-  <div id="ingList"></div>
-</div>
-
-<!-- RECIPES -->
-<div id="view-recipes" class="view">
-  <div class="view-header">
-    <div class="view-title">Recipes</div>
-    <button class="btn btn-primary" onclick="openRecipeForm()">+ Add Recipe</button>
-  </div>
-  <div class="form-panel" id="recipeForm" style="display:none">
-    <h3 id="recFormTitle">New Recipe</h3>
-    <input type="hidden" id="rec-edit-id">
-    <div class="form-row">
-      <div class="form-group" style="flex:3"><label>Recipe Name</label><input id="rec-name" type="text" placeholder="e.g. Chocolate Chip Cookies"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Description (optional)</label><textarea id="rec-desc" placeholder="Brief description or yield..."></textarea></div>
-    </div>
-    <div class="divider"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="section-label">Ingredients</div>
-      <button class="btn btn-secondary btn-sm" onclick="addIngRow()">+ Add</button>
-    </div>
-    <div id="recIngRows"></div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-primary" onclick="saveRecipe()">Save Recipe</button>
-      <button class="btn btn-secondary" onclick="closeRecipeForm()">Cancel</button>
-    </div>
-  </div>
-  <div id="recipeList"></div>
-</div>
-
-<!-- MENUS -->
-<div id="view-menus" class="view">
-  <div id="screen-grid">
-    <div class="view-header">
-      <div class="view-title">Menus</div>
-      <button class="btn btn-primary" onclick="showNewMenuForm()">+ New Menu</button>
-    </div>
-    <div class="form-panel" id="newMenuForm" style="display:none">
-      <h3>New Menu</h3>
-      <div class="form-row">
-        <div class="form-group" style="flex:3"><label>Menu Name</label><input id="new-menu-name" type="text" placeholder="e.g. Saturday Farmers Market"></div>
-      </div>
-      <div class="divider"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div class="section-label">Recipes</div>
-        <button class="btn btn-secondary btn-sm" onclick="addNewMenuRecipeRow()">+ Add Recipe</button>
-      </div>
-      <div id="newMenuRecipeRows"></div>
-      <div style="display:flex;gap:8px;margin-top:16px">
-        <button class="btn btn-primary" onclick="saveNewMenu()">Save Menu</button>
-        <button class="btn btn-secondary" onclick="hideNewMenuForm()">Cancel</button>
-      </div>
-    </div>
-    <div id="menuGrid"></div>
-  </div>
-
-  <div id="screen-detail" style="display:none">
-    <div class="detail-back">
-      <button class="btn btn-secondary btn-sm" onclick="showGrid()">← Menus</button>
-      <div class="detail-title" id="detail-title"></div>
-    </div>
-    <div class="detail-stats" id="detail-stats"></div>
-    <div class="detail-actions">
-      <button class="btn btn-primary" onclick="openEstimator()">Open Estimator</button>
-      <button class="btn btn-secondary" onclick="toggleDetailEdit()">Edit Menu</button>
-      <button class="btn-danger" onclick="deleteCurrentMenu()">Delete</button>
-    </div>
-    <div class="detail-edit-panel" id="detail-edit-panel">
-      <h3>Edit Menu</h3>
-      <div class="form-row">
-        <div class="form-group" style="flex:3"><label>Menu Name</label><input id="detail-menu-name" type="text"></div>
-      </div>
-      <div class="divider"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div class="section-label">Recipes</div>
-        <button class="btn btn-secondary btn-sm" onclick="addDetailMenuRecipeRow()">+ Add Recipe</button>
-      </div>
-      <div id="detail-menu-recipe-rows"></div>
-      <div style="display:flex;gap:8px;margin-top:16px">
-        <button class="btn btn-primary" onclick="saveDetailMenuEdit()">Save</button>
-        <button class="btn btn-secondary" onclick="toggleDetailEdit()">Cancel</button>
-      </div>
-    </div>
-    <div class="card">
-      <div style="padding:4px 0 12px"><span class="section-label">Recipes in this menu</span></div>
-      <div id="detail-recipe-list"></div>
-    </div>
-  </div>
-
-  <div id="screen-estimator" style="display:none">
-    <div class="estimator-back">
-      <button class="btn btn-secondary btn-sm" onclick="closeEstimator()">← Menu</button>
-      <div class="estimator-menu-name" id="estimator-title"></div>
-    </div>
-    <div id="estimatorContent"></div>
-  </div>
-</div>
-
-<!-- SHOPPING LIST -->
-<div id="view-shopping" class="view">
-  <div class="view-header"><div class="view-title">Shopping List</div></div>
-  <div class="menu-selector">
-    <label>Menu</label>
-    <select id="shop-menu-select" onchange="renderShoppingList()">
-      <option value="">— Select a menu —</option>
-    </select>
-  </div>
-  <div id="shoppingContent">
-    <div class="empty"><div class="empty-icon">🛒</div><strong>Select a menu to generate a shopping list</strong></div>
-  </div>
-</div>
-
-</main>
-
-<script>
-// ── BOOT FROM CONFIG ──────────────────────────────────
-const cfg = window.VERTICAL_CONFIG;
-if (!cfg) { document.body.innerHTML = '<p style="padding:40px;font-family:sans-serif">Error: config.js not loaded.</p>'; throw new Error('VERTICAL_CONFIG missing'); }
-
-// Apply branding
-document.getElementById('page-title').textContent = cfg.appName;
-document.getElementById('header-logo').innerHTML = cfg.logoHTML;
-document.getElementById('header-tagline').textContent = cfg.tagline;
-
-// Apply color palette
-const root = document.documentElement;
-Object.entries(cfg.colors).forEach(([k, v]) => root.style.setProperty('--' + k, v));
-
-// ── STATE ─────────────────────────────────────────────
-const STORAGE_KEY = cfg.storageKey;
-
-function loadState() {
-  try { const s = localStorage.getItem(STORAGE_KEY); if (s) return JSON.parse(s); } catch(e) {}
-  return JSON.parse(JSON.stringify(cfg.defaultState));
-}
-function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {} }
-function clearAllData() {
-  if (!confirm('Reset everything to defaults? Your custom data will be lost.')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  state = JSON.parse(JSON.stringify(cfg.defaultState));
-  saveState(); renderIngredients();
-}
-let state = loadState();
-let currentMenuId = null;
-
-// ── NAV ───────────────────────────────────────────────
-function showView(name, btn) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (name === 'ingredients') renderIngredients();
-  if (name === 'recipes') renderRecipes();
-  if (name === 'menus') showGrid();
-  if (name === 'shopping') { populateShoppingSelect(); renderShoppingList(); }
-}
-
-// ── MENU SCREENS ──────────────────────────────────────
-function showGrid() {
-  currentMenuId = null;
-  document.getElementById('screen-grid').style.display = 'block';
-  document.getElementById('screen-detail').style.display = 'none';
-  document.getElementById('screen-estimator').style.display = 'none';
-  renderMenuGrid();
-}
-function showDetail(menuId) {
-  currentMenuId = menuId;
-  document.getElementById('screen-grid').style.display = 'none';
-  document.getElementById('screen-detail').style.display = 'block';
-  document.getElementById('screen-estimator').style.display = 'none';
-  document.getElementById('detail-edit-panel').classList.remove('open');
-  renderDetail();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function openEstimator() {
-  const menu = state.menus.find(m => m.id === currentMenuId);
-  if (!menu) return;
-  document.getElementById('screen-grid').style.display = 'none';
-  document.getElementById('screen-detail').style.display = 'none';
-  document.getElementById('screen-estimator').style.display = 'block';
-  document.getElementById('estimator-title').textContent = menu.name;
-  renderEstimator(menu);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function closeEstimator() { showDetail(currentMenuId); }
-
-// ── CARD COLLAPSE ─────────────────────────────────────
-function toggleCard(id) {
-  const body = document.getElementById('card-body-' + id);
-  const caret = document.getElementById('card-caret-' + id);
-  if (!body) return;
-  body.classList.toggle('open');
-  if (caret) caret.classList.toggle('open');
-}
-
-// ── HELPERS ───────────────────────────────────────────
-function costPerUom(ing) { return ing.price / ing.size; }
-function recipeIdealCost(recipe) {
-  return recipe.ingredients.reduce((sum, ri) => {
-    const ing = state.ingredients.find(i => i.id === ri.ingId);
-    return sum + (ing ? costPerUom(ing) * ri.amount : 0);
-  }, 0);
-}
-function recipeActualCostPerUnit(recipe, qty) {
-  if (!qty || qty <= 0) return 0;
-  let total = 0;
-  recipe.ingredients.forEach(ri => {
-    const ing = state.ingredients.find(i => i.id === ri.ingId);
-    if (!ing) return;
-    total += Math.ceil((ri.amount * qty) / ing.size) * ing.price;
-  });
-  return total / qty;
-}
-function menuTrueCost(menu) {
-  return menu.recipes.reduce((sum, item) => {
-    const rec = state.recipes.find(r => r.id === item.recipeId);
-    return sum + (rec ? recipeActualCostPerUnit(rec, item.qty) * item.qty : 0);
-  }, 0);
-}
-function menuTotalBatches(menu) { return menu.recipes.reduce((s, i) => s + i.qty, 0); }
-function calcIngUsage(menu) {
-  const ingUsage = {};
-  menu.recipes.forEach(item => {
-    const rec = state.recipes.find(r => r.id === item.recipeId);
-    if (!rec) return;
-    rec.ingredients.forEach(ri => {
-      const ing = state.ingredients.find(i => i.id === ri.ingId);
-      if (!ing) return;
-      if (!ingUsage[ri.ingId]) ingUsage[ri.ingId] = { ing, consumed: 0, cost: 0 };
-      ingUsage[ri.ingId].consumed += ri.amount * item.qty;
-      ingUsage[ri.ingId].cost += costPerUom(ing) * ri.amount * item.qty;
-    });
-  });
-  Object.values(ingUsage).forEach(u => {
-    u.unitsOpened = Math.ceil(u.consumed / u.ing.size);
-    u.unitsCost = u.unitsOpened * u.ing.price;
-  });
-  return ingUsage;
-}
-function sweetSpotHint(recipe, currentQty) {
-  if (!currentQty || currentQty <= 0) return '';
-  const currentCost = recipeActualCostPerUnit(recipe, currentQty);
-  if (currentCost === 0) return '';
-  const scanTo = currentQty * 3;
-  let bestQty = null, bestCost = currentCost;
-  for (let q = currentQty + 1; q <= scanTo; q++) {
-    const c = recipeActualCostPerUnit(recipe, q);
-    if (c < bestCost) { bestCost = c; bestQty = q; break; }
-  }
-  if (!bestQty || (currentCost - bestCost) / currentCost < 0.10) {
-    if (currentQty === 1) return `<div class="sweet-spot optimal">\u2713 Good quantity</div>`;
-    const prevCost = recipeActualCostPerUnit(recipe, currentQty - 1);
-    if (prevCost > currentCost) return `<div class="sweet-spot optimal">\u2713 You're at a good quantity</div>`;
-    return '';
-  }
-  return `<div class="sweet-spot hint">\u2193 Make ${bestQty} batches instead and save $${(currentCost - bestCost).toFixed(2)}/batch</div>`;
-}
-function ingOptsHTML(selectedId) {
-  return state.ingredients.map(i =>
-    `<option value="${i.id}" ${i.id === selectedId ? 'selected' : ''}>${i.name} (${i.uom})</option>`
-  ).join('');
-}
-function recipeOptsHTML(selectedId) {
-  return state.recipes.map(r =>
-    `<option value="${r.id}" ${r.id === selectedId ? 'selected' : ''}>${r.name}</option>`
-  ).join('');
-}
-
-// ── INGREDIENTS ───────────────────────────────────────
-function openIngForm(ing) {
-  document.getElementById('ingFormTitle').textContent = ing ? 'Edit Ingredient' : 'New Ingredient';
-  document.getElementById('ing-edit-id').value = ing ? ing.id : '';
-  document.getElementById('ing-name').value = ing ? ing.name : '';
-  document.getElementById('ing-uom').value = ing ? ing.uom : '';
-  document.getElementById('ing-size').value = ing ? ing.size : '';
-  document.getElementById('ing-price').value = ing ? ing.price : '';
-  document.getElementById('ingForm').style.display = 'block';
-  document.getElementById('ing-name').focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function closeIngForm() { document.getElementById('ingForm').style.display = 'none'; }
-function saveIngredient() {
-  const name = document.getElementById('ing-name').value.trim();
-  const uom = document.getElementById('ing-uom').value.trim();
-  const size = parseFloat(document.getElementById('ing-size').value);
-  const price = parseFloat(document.getElementById('ing-price').value);
-  if (!name || !uom || isNaN(size) || isNaN(price)) { alert('Please fill in all fields.'); return; }
-  const editId = parseInt(document.getElementById('ing-edit-id').value);
-  if (editId) {
-    const ing = state.ingredients.find(i => i.id === editId);
-    if (ing) Object.assign(ing, { name, uom, size, price });
-  } else {
-    state.ingredients.push({ id: state.nextIngId++, name, uom, size, price });
-  }
-  saveState(); closeIngForm(); renderIngredients();
-}
-function deleteIngredient(id) {
-  if (!confirm('Delete this ingredient?')) return;
-  state.ingredients = state.ingredients.filter(i => i.id !== id);
-  saveState(); renderIngredients();
-}
-function renderIngredients() {
-  const el = document.getElementById('ingList');
-  if (!state.ingredients.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">${cfg.emptyIcons.ingredients}</div><strong>No ingredients yet</strong></div>`; return;
-  }
-  el.innerHTML = state.ingredients.map(ing => `
+    <head>
+        <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title id="page-title">Loading...</title>
+                <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+                    <script src="config.js"></script>
+                    <style>
+                        :root {
+                            --bg: #FDF6EE;
+                            --surface: #FFFCF8;
+                            --surface2: #F2E8DA;
+                            --border: #E0D0BC;
+                            --text: #2A1F14;
+                            --text-muted: #7A6555;
+                            --accent: #9B3A1A;
+                            --accent-light: #F5E6DF;
+                            --accent2: #3A6B3A;
+                            --accent2-light: #DFF0DF;
+                            --mono: 'DM Mono', monospace;
+                            --serif: 'DM Serif Display', serif;
+                            --sans: 'DM Sans', sans-serif;
+                        }
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
+                        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+                        
+                        header { background: var(--text); color: var(--bg); padding: 0 24px; display: flex; align-items: center; height: 60px; position: sticky; top: 0; z-index: 100; gap: 10px; }
+                        .logo { font-family: var(--serif); font-size: 1.25rem; letter-spacing: 0.02em; color: var(--bg); }
+                        .logo span { color: #D4845A; }
+                        .logo-sub { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: #A08878; margin-top: 2px; }
+                        
+                        nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none; position: sticky; top: 60px; z-index: 99; }
+                        nav::-webkit-scrollbar { display: none; }
+                        .nav-btn { flex-shrink: 0; padding: 14px 20px; font-family: var(--sans); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+                        .nav-btn:hover { color: var(--text); }
+                        .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+                        
+                        main { flex: 1; padding: 24px 16px; max-width: 900px; margin: 0 auto; width: 100%; }
+                        .view { display: none; }
+                        .view.active { display: block; }
+                        
+                        .view-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+                        .view-title { font-family: var(--serif); font-size: 1.8rem; color: var(--text); }
+                        
+                        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 6px; font-family: var(--sans); font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+                        .btn-primary { background: var(--accent); color: white; }
+                        .btn-primary:hover { background: #7A2D14; }
+                        .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+                        .btn-secondary:hover { background: var(--border); }
+                        .btn-ghost { background: none; color: var(--text-muted); padding: 6px 10px; border: none; cursor: pointer; border-radius: 6px; font-size: 0.85rem; font-family: var(--sans); font-weight: 500; }
+                        .btn-ghost:hover { color: var(--accent); background: var(--accent-light); }
+                        .btn-danger { background: none; color: #B03030; padding: 6px 10px; border: none; cursor: pointer; border-radius: 6px; font-size: 0.85rem; font-family: var(--sans); }
+                        .btn-danger:hover { background: #FDE8E8; }
+                        .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+                        
+                        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.15s; }
+                        .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+                        .card-top { display: flex; align-items: center; padding: 14px 16px; gap: 10px; }
+                        .card-info { flex: 1; min-width: 0; cursor: pointer; }
+                        .card-title { font-weight: 600; font-size: 0.95rem; }
+                        .card-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; font-family: var(--mono); }
+                        .card-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+                        .card-body { display: none; padding: 12px 16px 14px; border-top: 1px solid var(--surface2); }
+                        .card-body.open { display: block; }
+                        .caret { font-size: 0.7rem; color: var(--text-muted); transition: transform 0.2s; display: inline-block; cursor: pointer; padding: 6px; }
+                        .caret.open { transform: rotate(90deg); }
+                        
+                        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+                        @media (min-width: 640px) { .menu-grid { grid-template-columns: 1fr 1fr; } }
+                        .menu-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+                        .menu-tile:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #C8A898; }
+                        .menu-tile-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+                        .menu-tile-name { font-family: var(--serif); font-size: 1.15rem; color: var(--text); line-height: 1.2; }
+                        .menu-tile-arrow { color: var(--text-muted); font-size: 1rem; margin-top: 2px; }
+                        .menu-tile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+                        .menu-stat { background: var(--surface2); border-radius: 8px; padding: 10px 12px; }
+                        .menu-stat-val { font-family: var(--serif); font-size: 1.15rem; color: var(--accent); }
+                        .menu-stat-lbl { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+                        .menu-tile-recipes { font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; }
+                        
+                        .detail-back { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+                        .detail-title { font-family: var(--serif); font-size: 1.8rem; color: var(--text); }
+                        .detail-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
+                        .detail-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+                        .detail-stat-val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); }
+                        .detail-stat-lbl { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+                        .detail-actions { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+                        .detail-edit-panel { background: var(--accent-light); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; display: none; }
+                        .detail-edit-panel.open { display: block; }
+                        .detail-edit-panel h3 { font-family: var(--serif); font-size: 1.1rem; color: var(--accent); margin-bottom: 14px; }
+                        
+                        .estimator-back { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+                        .estimator-menu-name { font-family: var(--serif); font-size: 1.6rem; color: var(--text); }
+                        
+                        .form-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+                        .form-panel h3 { font-family: var(--serif); font-size: 1.1rem; margin-bottom: 16px; color: var(--text); }
+                        .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+                        .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+                        .form-group label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
+                        input, select, textarea { font-family: var(--sans); font-size: 0.88rem; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
+                        input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
+                        textarea { resize: vertical; min-height: 70px; }
+                        
+                        .ing-row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--surface2); }
+                        .ing-row:last-child { border-bottom: none; }
+                        .section-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
+                        
+                        .est-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+                        .est-table th { text-align: left; padding: 8px 10px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); }
+                        .est-table td { padding: 10px 10px; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
+                        .est-table tr:last-child td { border-bottom: none; }
+                        .est-table .num { font-family: var(--mono); text-align: right; font-size: 0.83rem; }
+                        .est-table tfoot td { font-weight: 600; background: var(--surface2); border-top: 2px solid var(--border); }
+                        .qty-input { width: 65px; text-align: center; font-family: var(--mono); font-size: 0.88rem; padding: 5px 6px; }
+                        .cost-better { color: var(--accent2); font-weight: 600; }
+                        .sweet-spot { font-size: 0.75rem; margin-top: 4px; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+                        .sweet-spot.hint { background: #FFF4E0; color: #8B5C00; border: 1px solid #F0D080; }
+                        .sweet-spot.optimal { background: var(--accent2-light); color: var(--accent2); border: 1px solid #A8D8A8; }
+                        
+                        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+                        .summary-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+                        .summary-box .val { font-family: var(--serif); font-size: 1.5rem; color: var(--accent); }
+                        .summary-box .lbl { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+                        
+                        .menu-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+                        .menu-selector label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
+                        .menu-selector select { max-width: 260px; flex: 1; }
+                        .shop-item { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--surface2); font-size: 0.88rem; }
+                        .shop-item:last-child { border-bottom: none; }
+                        .shop-qty { font-family: var(--mono); font-size: 0.82rem; color: var(--accent); font-weight: 500; white-space: nowrap; margin-left: 12px; }
+                        
+                        .empty { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+                        .empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+                        .empty p { font-size: 0.88rem; margin-top: 6px; }
+                        .divider { height: 1px; background: var(--border); margin: 16px 0; }
+                        
+                        .storage-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 8px 16px; font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+                        .storage-bar strong { color: var(--accent2); }
+                        
+                        @media (max-width: 500px) {
+                            .view-title, .detail-title { font-size: 1.4rem; }
+                            .summary-box .val { font-size: 1.2rem; }
+                            .est-table th, .est-table td { padding: 7px 5px; font-size: 0.75rem; }
+                            .qty-input { width: 52px; }
+                        }
+                    </style>
+    </head>
+    <body>
+        
+        <header>
+            <div>
+                <div class="logo" id="header-logo"></div>
+                <div class="logo-sub" id="header-tagline"></div>
+            </div>
+        </header>
+        
+        <div class="storage-bar">
+            <span>💾 <strong>Auto-saving</strong> to this browser</span>
+            <button class="btn-ghost btn-sm" onclick="clearAllData()" style="font-size:0.72rem;padding:3px 8px;">Reset to defaults</button>
+        </div>
+        
+        <nav>
+            <button class="nav-btn active" onclick="showView('menus', this)">Menus</button>
+            <button class="nav-btn" onclick="showView('recipes', this)">Recipes</button>
+            <button class="nav-btn" onclick="showView('ingredients', this)">Ingredients</button>
+            <button class="nav-btn" onclick="showView('shopping', this)">Shopping List</button>
+        </nav>
+        
+        <main>
+            
+            <!-- MENUS -->
+            <div id="view-menus" class="view active">
+                <div id="screen-grid">
+                    <div class="view-header">
+                        <div class="view-title">Menus</div>
+                        <button class="btn btn-primary" onclick="showNewMenuForm()">+ New Menu</button>
+                    </div>
+                    <div class="form-panel" id="newMenuForm" style="display:none">
+                        <h3>New Menu</h3>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:3"><label>Menu Name</label><input id="new-menu-name" type="text" placeholder="e.g. Saturday Farmers Market"></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                            <div class="section-label">Recipes</div>
+                            <button class="btn btn-secondary btn-sm" onclick="addNewMenuRecipeRow()">+ Add Recipe</button>
+                        </div>
+                        <div id="newMenuRecipeRows"></div>
+                        <div style="display:flex;gap:8px;margin-top:16px">
+                            <button class="btn btn-primary" onclick="saveNewMenu()">Save Menu</button>
+                            <button class="btn btn-secondary" onclick="hideNewMenuForm()">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="menuGrid"></div>
+                </div>
+                
+                <div id="screen-detail" style="display:none">
+                    <div class="detail-back">
+                        <button class="btn btn-secondary btn-sm" onclick="showGrid()">← Menus</button>
+                        <div class="detail-title" id="detail-title"></div>
+                    </div>
+                    <div class="detail-stats" id="detail-stats"></div>
+                    <div class="detail-actions">
+                        <button class="btn btn-primary" onclick="openEstimator()">Open Estimator</button>
+                        <button class="btn btn-secondary" onclick="toggleDetailEdit()">Edit Menu</button>
+                        <button class="btn-danger" onclick="deleteCurrentMenu()">Delete</button>
+                    </div>
+                    <div class="detail-edit-panel" id="detail-edit-panel">
+                        <h3>Edit Menu</h3>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:3"><label>Menu Name</label><input id="detail-menu-name" type="text"></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                            <div class="section-label">Recipes</div>
+                            <button class="btn btn-secondary btn-sm" onclick="addDetailMenuRecipeRow()">+ Add Recipe</button>
+                        </div>
+                        <div id="detail-menu-recipe-rows"></div>
+                        <div style="display:flex;gap:8px;margin-top:16px">
+                            <button class="btn btn-primary" onclick="saveDetailMenuEdit()">Save</button>
+                            <button class="btn btn-secondary" onclick="toggleDetailEdit()">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div style="padding:4px 0 12px"><span class="section-label">Recipes in this menu</span></div>
+                        <div id="detail-recipe-list"></div>
+                    </div>
+                </div>
+                
+                <div id="screen-estimator" style="display:none">
+                    <div class="estimator-back">
+                        <button class="btn btn-secondary btn-sm" onclick="closeEstimator()">← Menu</button>
+                        <div class="estimator-menu-name" id="estimator-title"></div>
+                    </div>
+                    <div id="estimatorContent"></div>
+                </div>
+            </div>
+            
+            <!-- RECIPES -->
+            <div id="view-recipes" class="view">
+                <div class="view-header">
+                    <div class="view-title">Recipes</div>
+                    <button class="btn btn-primary" onclick="openRecipeForm()">+ Add Recipe</button>
+                </div>
+                <div class="form-panel" id="recipeForm" style="display:none">
+                    <h3 id="recFormTitle">New Recipe</h3>
+                    <input type="hidden" id="rec-edit-id">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:3"><label>Recipe Name</label><input id="rec-name" type="text" placeholder="e.g. Chocolate Chip Cookies"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Description (optional)</label><textarea id="rec-desc" placeholder="Brief description or yield..."></textarea></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                            <div class="section-label">Ingredients</div>
+                            <button class="btn btn-secondary btn-sm" onclick="addIngRow()">+ Add</button>
+                        </div>
+                        <div id="recIngRows"></div>
+                        <div style="display:flex;gap:8px;margin-top:16px">
+                            <button class="btn btn-primary" onclick="saveRecipe()">Save Recipe</button>
+                            <button class="btn btn-secondary" onclick="closeRecipeForm()">Cancel</button>
+                        </div>
+                </div>
+                <div id="recipeList"></div>
+            </div>
+            
+            
+            <!-- INGREDIENTS -->
+            <div id="view-ingredients" class="view">
+                <div class="view-header">
+                    <div class="view-title">Ingredients</div>
+                    <button class="btn btn-primary" onclick="openIngForm()">+ Add Ingredient</button>
+                </div>
+                <div class="form-panel" id="ingForm" style="display:none">
+                    <h3 id="ingFormTitle">New Ingredient</h3>
+                    <input type="hidden" id="ing-edit-id">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:3"><label>Name</label><input id="ing-name" type="text" placeholder="e.g. All-Purpose Flour"></div>
+                            <div class="form-group" style="flex:2"><label>Unit of Measure</label><input id="ing-uom" type="text" placeholder="e.g. cup, tsp, oz"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Package Size (in UoM)</label><input id="ing-size" type="number" placeholder="e.g. 18.9" min="0" step="any"></div>
+                            <div class="form-group"><label>Package Price ($)</label><input id="ing-price" type="number" placeholder="e.g. 1.97" min="0" step="0.01"></div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:4px">
+                            <button class="btn btn-primary" onclick="saveIngredient()">Save</button>
+                            <button class="btn btn-secondary" onclick="closeIngForm()">Cancel</button>
+                        </div>
+                </div>
+                <div id="ingList"></div>
+            </div>
+            
+            <!-- SHOPPING LIST -->
+            <div id="view-shopping" class="view">
+                <div class="view-header"><div class="view-title">Shopping List</div></div>
+                <div class="menu-selector">
+                    <label>Menu</label>
+                    <select id="shop-menu-select" onchange="renderShoppingList()">
+                        <option value="">— Select a menu —</option>
+                    </select>
+                </div>
+                <div id="shoppingContent">
+                    <div class="empty"><div class="empty-icon">🛒</div><strong>Select a menu to generate a shopping list</strong></div>
+                </div>
+            </div>
+            
+        </main>
+        
+        <script>
+            // ── BOOT FROM CONFIG ──────────────────────────────────
+            const cfg = window.VERTICAL_CONFIG;
+            if (!cfg) { document.body.innerHTML = '<p style="padding:40px;font-family:sans-serif">Error: config.js not loaded.</p>'; throw new Error('VERTICAL_CONFIG missing'); }
+            
+            // Apply branding
+            document.getElementById('page-title').textContent = cfg.appName;
+            document.getElementById('header-logo').innerHTML = cfg.logoHTML;
+            document.getElementById('header-tagline').textContent = cfg.tagline;
+            
+            // Apply color palette
+            const root = document.documentElement;
+            Object.entries(cfg.colors).forEach(([k, v]) => root.style.setProperty('--' + k, v));
+            
+            // ── STATE ─────────────────────────────────────────────
+            const STORAGE_KEY = cfg.storageKey;
+            
+            function loadState() {
+                try { const s = localStorage.getItem(STORAGE_KEY); if (s) return JSON.parse(s); } catch(e) {}
+                return JSON.parse(JSON.stringify(cfg.defaultState));
+            }
+            function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {} }
+            function clearAllData() {
+                if (!confirm('Reset everything to defaults? Your custom data will be lost.')) return;
+                localStorage.removeItem(STORAGE_KEY);
+                state = JSON.parse(JSON.stringify(cfg.defaultState));
+                saveState(); renderIngredients();
+            }
+            let state = loadState();
+            let currentMenuId = null;
+            
+            // ── NAV ───────────────────────────────────────────────
+            function showView(name, btn) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('view-' + name).classList.add('active');
+                if (btn) btn.classList.add('active');
+                if (name === 'ingredients') renderIngredients();
+                if (name === 'recipes') renderRecipes();
+                if (name === 'menus') showGrid();
+                if (name === 'shopping') { populateShoppingSelect(); renderShoppingList(); }
+            }
+            
+            // ── MENU SCREENS ──────────────────────────────────────
+            function showGrid() {
+                currentMenuId = null;
+                document.getElementById('screen-grid').style.display = 'block';
+                document.getElementById('screen-detail').style.display = 'none';
+                document.getElementById('screen-estimator').style.display = 'none';
+                renderMenuGrid();
+            }
+            function showDetail(menuId) {
+                currentMenuId = menuId;
+                document.getElementById('screen-grid').style.display = 'none';
+                document.getElementById('screen-detail').style.display = 'block';
+                document.getElementById('screen-estimator').style.display = 'none';
+                document.getElementById('detail-edit-panel').classList.remove('open');
+                renderDetail();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            function openEstimator() {
+                const menu = state.menus.find(m => m.id === currentMenuId);
+                if (!menu) return;
+                document.getElementById('screen-grid').style.display = 'none';
+                document.getElementById('screen-detail').style.display = 'none';
+                document.getElementById('screen-estimator').style.display = 'block';
+                document.getElementById('estimator-title').textContent = menu.name;
+                renderEstimator(menu);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            function closeEstimator() { showDetail(currentMenuId); }
+            
+            // ── CARD COLLAPSE ─────────────────────────────────────
+            function toggleCard(id) {
+                const body = document.getElementById('card-body-' + id);
+                const caret = document.getElementById('card-caret-' + id);
+                if (!body) return;
+                body.classList.toggle('open');
+                if (caret) caret.classList.toggle('open');
+            }
+            
+            // ── HELPERS ───────────────────────────────────────────
+            function costPerUom(ing) { return ing.price / ing.size; }
+            function recipeIdealCost(recipe) {
+                return recipe.ingredients.reduce((sum, ri) => {
+                    const ing = state.ingredients.find(i => i.id === ri.ingId);
+                    return sum + (ing ? costPerUom(ing) * ri.amount : 0);
+                }, 0);
+            }
+            function recipeActualCostPerUnit(recipe, qty) {
+                if (!qty || qty <= 0) return 0;
+                let total = 0;
+                recipe.ingredients.forEach(ri => {
+                    const ing = state.ingredients.find(i => i.id === ri.ingId);
+                    if (!ing) return;
+                    total += Math.ceil((ri.amount * qty) / ing.size) * ing.price;
+                });
+                return total / qty;
+            }
+            function menuTrueCost(menu) {
+                return menu.recipes.reduce((sum, item) => {
+                    const rec = state.recipes.find(r => r.id === item.recipeId);
+                    return sum + (rec ? recipeActualCostPerUnit(rec, item.qty) * item.qty : 0);
+                }, 0);
+            }
+            function menuTotalBatches(menu) { return menu.recipes.reduce((s, i) => s + i.qty, 0); }
+            function calcIngUsage(menu) {
+                const ingUsage = {};
+                menu.recipes.forEach(item => {
+                    const rec = state.recipes.find(r => r.id === item.recipeId);
+                    if (!rec) return;
+                    rec.ingredients.forEach(ri => {
+                        const ing = state.ingredients.find(i => i.id === ri.ingId);
+                        if (!ing) return;
+                        if (!ingUsage[ri.ingId]) ingUsage[ri.ingId] = { ing, consumed: 0, cost: 0 };
+                        ingUsage[ri.ingId].consumed += ri.amount * item.qty;
+                        ingUsage[ri.ingId].cost += costPerUom(ing) * ri.amount * item.qty;
+                    });
+                });
+                Object.values(ingUsage).forEach(u => {
+                    u.unitsOpened = Math.ceil(u.consumed / u.ing.size);
+                    u.unitsCost = u.unitsOpened * u.ing.price;
+                });
+                return ingUsage;
+            }
+            function sweetSpotHint(recipe, currentQty) {
+                if (!currentQty || currentQty <= 0) return '';
+                const currentCost = recipeActualCostPerUnit(recipe, currentQty);
+                if (currentCost === 0) return '';
+                const scanTo = currentQty * 3;
+                let bestQty = null, bestCost = currentCost;
+                for (let q = currentQty + 1; q <= scanTo; q++) {
+                    const c = recipeActualCostPerUnit(recipe, q);
+                    if (c < bestCost) { bestCost = c; bestQty = q; break; }
+                }
+                if (!bestQty || (currentCost - bestCost) / currentCost < 0.10) {
+                    if (currentQty === 1) return `<div class="sweet-spot optimal">\u2713 Good quantity</div>`;
+                    const prevCost = recipeActualCostPerUnit(recipe, currentQty - 1);
+                    if (prevCost > currentCost) return `<div class="sweet-spot optimal">\u2713 You're at a good quantity</div>`;
+                    return '';
+                }
+                return `<div class="sweet-spot hint">\u2193 Make ${bestQty} batches instead and save $${(currentCost - bestCost).toFixed(2)}/batch</div>`;
+            }
+            function ingOptsHTML(selectedId) {
+                return state.ingredients.map(i =>
+                                             `<option value="${i.id}" ${i.id === selectedId ? 'selected' : ''}>${i.name} (${i.uom})</option>`
+                                             ).join('');
+            }
+            function recipeOptsHTML(selectedId) {
+                return state.recipes.map(r =>
+                                         `<option value="${r.id}" ${r.id === selectedId ? 'selected' : ''}>${r.name}</option>`
+                                         ).join('');
+            }
+            
+            // ── INGREDIENTS ───────────────────────────────────────
+            function openIngForm(ing) {
+                document.getElementById('ingFormTitle').textContent = ing ? 'Edit Ingredient' : 'New Ingredient';
+                document.getElementById('ing-edit-id').value = ing ? ing.id : '';
+                document.getElementById('ing-name').value = ing ? ing.name : '';
+                document.getElementById('ing-uom').value = ing ? ing.uom : '';
+                document.getElementById('ing-size').value = ing ? ing.size : '';
+                document.getElementById('ing-price').value = ing ? ing.price : '';
+                document.getElementById('ingForm').style.display = 'block';
+                document.getElementById('ing-name').focus();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            function closeIngForm() { document.getElementById('ingForm').style.display = 'none'; }
+            function saveIngredient() {
+                const name = document.getElementById('ing-name').value.trim();
+                const uom = document.getElementById('ing-uom').value.trim();
+                const size = parseFloat(document.getElementById('ing-size').value);
+                const price = parseFloat(document.getElementById('ing-price').value);
+                if (!name || !uom || isNaN(size) || isNaN(price)) { alert('Please fill in all fields.'); return; }
+                const editId = parseInt(document.getElementById('ing-edit-id').value);
+                if (editId) {
+                    const ing = state.ingredients.find(i => i.id === editId);
+                    if (ing) Object.assign(ing, { name, uom, size, price });
+                } else {
+                    state.ingredients.push({ id: state.nextIngId++, name, uom, size, price });
+                }
+                saveState(); closeIngForm(); renderIngredients();
+            }
+            function deleteIngredient(id) {
+                if (!confirm('Delete this ingredient?')) return;
+                state.ingredients = state.ingredients.filter(i => i.id !== id);
+                saveState(); renderIngredients();
+            }
+            function renderIngredients() {
+                const el = document.getElementById('ingList');
+                if (!state.ingredients.length) {
+                    el.innerHTML = `<div class="empty"><div class="empty-icon">${cfg.emptyIcons.ingredients}</div><strong>No ingredients yet</strong></div>`; return;
+                }
+                el.innerHTML = state.ingredients.map(ing => `
     <div class="card">
       <div class="card-top">
         <div class="card-info">
@@ -512,73 +513,73 @@ function renderIngredients() {
         </div>
       </div>
     </div>`).join('');
-}
-
-// ── RECIPES ───────────────────────────────────────────
-function openRecipeForm(rec) {
-  document.getElementById('recFormTitle').textContent = rec ? 'Edit Recipe' : 'New Recipe';
-  document.getElementById('rec-edit-id').value = rec ? rec.id : '';
-  document.getElementById('rec-name').value = rec ? rec.name : '';
-  document.getElementById('rec-desc').value = rec ? (rec.desc || '') : '';
-  const container = document.getElementById('recIngRows');
-  container.innerHTML = '';
-  if (rec && rec.ingredients.length) { rec.ingredients.forEach(ri => addIngRow(ri.ingId, ri.amount)); }
-  else { addIngRow(); }
-  document.getElementById('recipeForm').style.display = 'block';
-  document.getElementById('rec-name').focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function closeRecipeForm() { document.getElementById('recipeForm').style.display = 'none'; }
-function addIngRow(selectedIngId, amount) {
-  const container = document.getElementById('recIngRows');
-  const row = document.createElement('div');
-  row.className = 'ing-row';
-  row.innerHTML = `
+            }
+            
+            // ── RECIPES ───────────────────────────────────────────
+            function openRecipeForm(rec) {
+                document.getElementById('recFormTitle').textContent = rec ? 'Edit Recipe' : 'New Recipe';
+                document.getElementById('rec-edit-id').value = rec ? rec.id : '';
+                document.getElementById('rec-name').value = rec ? rec.name : '';
+                document.getElementById('rec-desc').value = rec ? (rec.desc || '') : '';
+                const container = document.getElementById('recIngRows');
+                container.innerHTML = '';
+                if (rec && rec.ingredients.length) { rec.ingredients.forEach(ri => addIngRow(ri.ingId, ri.amount)); }
+                else { addIngRow(); }
+                document.getElementById('recipeForm').style.display = 'block';
+                document.getElementById('rec-name').focus();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            function closeRecipeForm() { document.getElementById('recipeForm').style.display = 'none'; }
+            function addIngRow(selectedIngId, amount) {
+                const container = document.getElementById('recIngRows');
+                const row = document.createElement('div');
+                row.className = 'ing-row';
+                row.innerHTML = `
     <select style="flex:3">${ingOptsHTML(selectedIngId)}</select>
     <input type="number" placeholder="Amount" min="0" step="any" value="${amount !== undefined ? amount : ''}" style="flex:1;max-width:90px">
     <button class="btn-danger" style="padding:4px 8px;flex-shrink:0" onclick="this.parentElement.remove()">✕</button>`;
-  container.appendChild(row);
-}
-function saveRecipe() {
-  const name = document.getElementById('rec-name').value.trim();
-  const desc = document.getElementById('rec-desc').value.trim();
-  if (!name) { alert('Recipe name is required.'); return; }
-  const rows = document.querySelectorAll('#recIngRows .ing-row');
-  const ingredients = [];
-  rows.forEach(row => {
-    const ingId = parseInt(row.querySelector('select').value);
-    const amount = parseFloat(row.querySelector('input').value);
-    if (ingId && !isNaN(amount) && amount > 0) ingredients.push({ ingId, amount });
-  });
-  const editId = parseInt(document.getElementById('rec-edit-id').value);
-  if (editId) {
-    const rec = state.recipes.find(r => r.id === editId);
-    if (rec) Object.assign(rec, { name, desc, ingredients });
-  } else {
-    state.recipes.push({ id: state.nextRecId++, name, desc, ingredients });
-  }
-  saveState(); closeRecipeForm(); renderRecipes();
-}
-function deleteRecipe(id) {
-  if (!confirm('Delete this recipe?')) return;
-  state.recipes = state.recipes.filter(r => r.id !== id);
-  saveState(); renderRecipes();
-}
-function renderRecipes() {
-  const el = document.getElementById('recipeList');
-  if (!state.recipes.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">${cfg.emptyIcons.recipes}</div><strong>No recipes yet</strong></div>`; return;
-  }
-  el.innerHTML = state.recipes.map(rec => {
-    const cost = recipeIdealCost(rec);
-    const ingLines = rec.ingredients.map(ri => {
-      const ing = state.ingredients.find(i => i.id === ri.ingId);
-      return ing ? `<div class="ing-row"><span style="flex:2;font-size:0.88rem">${ing.name}</span><span style="font-size:0.8rem;color:var(--text-muted);font-family:var(--mono)">${ri.amount} ${ing.uom}</span></div>` : '';
-    }).join('');
-    const safeRec = JSON.stringify(rec).replace(/"/g, '&quot;');
-    return `
-    <div class="card">
-      <div class="card-top">
+    container.appendChild(row);
+            }
+            function saveRecipe() {
+                const name = document.getElementById('rec-name').value.trim();
+                const desc = document.getElementById('rec-desc').value.trim();
+                if (!name) { alert('Recipe name is required.'); return; }
+                const rows = document.querySelectorAll('#recIngRows .ing-row');
+                const ingredients = [];
+                rows.forEach(row => {
+                    const ingId = parseInt(row.querySelector('select').value);
+                    const amount = parseFloat(row.querySelector('input').value);
+                    if (ingId && !isNaN(amount) && amount > 0) ingredients.push({ ingId, amount });
+                });
+                const editId = parseInt(document.getElementById('rec-edit-id').value);
+                if (editId) {
+                    const rec = state.recipes.find(r => r.id === editId);
+                    if (rec) Object.assign(rec, { name, desc, ingredients });
+                } else {
+                    state.recipes.push({ id: state.nextRecId++, name, desc, ingredients });
+                }
+                saveState(); closeRecipeForm(); renderRecipes();
+            }
+            function deleteRecipe(id) {
+                if (!confirm('Delete this recipe?')) return;
+                state.recipes = state.recipes.filter(r => r.id !== id);
+                saveState(); renderRecipes();
+            }
+            function renderRecipes() {
+                const el = document.getElementById('recipeList');
+                if (!state.recipes.length) {
+                    el.innerHTML = `<div class="empty"><div class="empty-icon">${cfg.emptyIcons.recipes}</div><strong>No recipes yet</strong></div>`; return;
+                }
+                el.innerHTML = state.recipes.map(rec => {
+                    const cost = recipeIdealCost(rec);
+                    const ingLines = rec.ingredients.map(ri => {
+                        const ing = state.ingredients.find(i => i.id === ri.ingId);
+                        return ing ? `<div class="ing-row"><span style="flex:2;font-size:0.88rem">${ing.name}</span><span style="font-size:0.8rem;color:var(--text-muted);font-family:var(--mono)">${ri.amount} ${ing.uom}</span></div>` : '';
+                    }).join('');
+                    const safeRec = JSON.stringify(rec).replace(/"/g, '&quot;');
+                    return `
+        <div class="card">
+        <div class="card-top">
         <div class="card-info" onclick="toggleCard('rec-${rec.id}')">
           <div class="card-title">${rec.name}</div>
           <div class="card-sub">$${cost.toFixed(2)} / batch &nbsp;·&nbsp; ${rec.ingredients.length} ingredient${rec.ingredients.length !== 1 ? 's' : ''}</div>
@@ -588,185 +589,185 @@ function renderRecipes() {
           <button class="btn-danger btn-sm" onclick="deleteRecipe(${rec.id})">✕</button>
           <span class="caret" id="card-caret-rec-${rec.id}" onclick="toggleCard('rec-${rec.id}')">▶</span>
         </div>
-      </div>
-      <div class="card-body" id="card-body-rec-${rec.id}">
+        </div>
+        <div class="card-body" id="card-body-rec-${rec.id}">
         ${rec.desc ? `<p style="font-size:0.83rem;color:var(--text-muted);margin-bottom:10px">${rec.desc}</p>` : ''}
         ${ingLines}
       </div>
     </div>`;
-  }).join('');
-}
-
-// ── MENU GRID ─────────────────────────────────────────
-function showNewMenuForm() {
-  document.getElementById('newMenuForm').style.display = 'block';
-  document.getElementById('new-menu-name').value = '';
-  document.getElementById('newMenuRecipeRows').innerHTML = '';
-  addNewMenuRecipeRow();
-  document.getElementById('new-menu-name').focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function hideNewMenuForm() { document.getElementById('newMenuForm').style.display = 'none'; }
-function addNewMenuRecipeRow() {
-  const container = document.getElementById('newMenuRecipeRows');
-  const row = document.createElement('div');
-  row.className = 'ing-row';
-  row.innerHTML = `
+                }).join('');
+            }
+            
+            // ── MENU GRID ─────────────────────────────────────────
+            function showNewMenuForm() {
+                document.getElementById('newMenuForm').style.display = 'block';
+                document.getElementById('new-menu-name').value = '';
+                document.getElementById('newMenuRecipeRows').innerHTML = '';
+                addNewMenuRecipeRow();
+                document.getElementById('new-menu-name').focus();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            function hideNewMenuForm() { document.getElementById('newMenuForm').style.display = 'none'; }
+            function addNewMenuRecipeRow() {
+                const container = document.getElementById('newMenuRecipeRows');
+                const row = document.createElement('div');
+                row.className = 'ing-row';
+                row.innerHTML = `
     <select style="flex:3">${recipeOptsHTML()}</select>
     <button class="btn-danger" style="padding:4px 8px;flex-shrink:0" onclick="this.parentElement.remove()">✕</button>`;
-  container.appendChild(row);
-}
-function saveNewMenu() {
-  const name = document.getElementById('new-menu-name').value.trim();
-  if (!name) { alert('Menu name is required.'); return; }
-  const rows = document.querySelectorAll('#newMenuRecipeRows .ing-row');
-  const recipeIds = [];
-  rows.forEach(row => {
-    const recipeId = parseInt(row.querySelector('select').value);
-    if (recipeId) recipeIds.push(recipeId);
-  });
-  state.menus.push({ id: state.nextMenuId++, name, recipes: recipeIds.map(recipeId => ({ recipeId, qty: 1 })) });
-  saveState(); hideNewMenuForm(); renderMenuGrid();
-}
-function renderMenuGrid() {
-  const el = document.getElementById('menuGrid');
-  if (!state.menus.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">${cfg.emptyIcons.menus}</div><strong>No menus yet</strong><p>Create your first menu to start estimating.</p></div>`; return;
-  }
-  el.innerHTML = `<div class="menu-grid">${state.menus.map(menu => {
-    const trueCost = menuTrueCost(menu);
-    const totalBatches = menuTotalBatches(menu);
-    const avgCost = totalBatches > 0 ? trueCost / totalBatches : 0;
-    const recipeNames = menu.recipes.map(item => {
+    container.appendChild(row);
+            }
+            function saveNewMenu() {
+                const name = document.getElementById('new-menu-name').value.trim();
+                if (!name) { alert('Menu name is required.'); return; }
+                const rows = document.querySelectorAll('#newMenuRecipeRows .ing-row');
+                const recipeIds = [];
+                rows.forEach(row => {
+                    const recipeId = parseInt(row.querySelector('select').value);
+                    if (recipeId) recipeIds.push(recipeId);
+                });
+                state.menus.push({ id: state.nextMenuId++, name, recipes: recipeIds.map(recipeId => ({ recipeId, qty: 1 })) });
+                saveState(); hideNewMenuForm(); renderMenuGrid();
+            }
+            function renderMenuGrid() {
+                const el = document.getElementById('menuGrid');
+                if (!state.menus.length) {
+                    el.innerHTML = `<div class="empty"><div class="empty-icon">${cfg.emptyIcons.menus}</div><strong>No menus yet</strong><p>Create your first menu to start estimating.</p></div>`; return;
+                }
+                el.innerHTML = `<div class="menu-grid">${state.menus.map(menu => {
+      const trueCost = menuTrueCost(menu);
+      const totalBatches = menuTotalBatches(menu);
+      const avgCost = totalBatches > 0 ? trueCost / totalBatches : 0;
+      const recipeNames = menu.recipes.map(item => {
       const rec = state.recipes.find(r => r.id === item.recipeId);
       return rec ? `${rec.name} \u00D7${item.qty}` : '';
     }).filter(Boolean).join(', ');
     return `
     <div class="menu-tile" onclick="showDetail(${menu.id})">
-      <div class="menu-tile-top">
-        <div class="menu-tile-name">${menu.name}</div>
-        <div class="menu-tile-arrow">›</div>
-      </div>
-      <div class="menu-tile-stats">
-        <div class="menu-stat"><div class="menu-stat-val">${totalBatches}</div><div class="menu-stat-lbl">Total Batches</div></div>
-        <div class="menu-stat"><div class="menu-stat-val">$${trueCost.toFixed(2)}</div><div class="menu-stat-lbl">True Cost</div></div>
-        <div class="menu-stat"><div class="menu-stat-val">$${avgCost.toFixed(2)}</div><div class="menu-stat-lbl">Avg / Batch</div></div>
-        <div class="menu-stat"><div class="menu-stat-val">${menu.recipes.length}</div><div class="menu-stat-lbl">Recipes</div></div>
-      </div>
-      <div class="menu-tile-recipes">${recipeNames}</div>
+    <div class="menu-tile-top">
+    <div class="menu-tile-name">${menu.name}</div>
+    <div class="menu-tile-arrow">›</div>
+    </div>
+    <div class="menu-tile-stats">
+    <div class="menu-stat"><div class="menu-stat-val">${totalBatches}</div><div class="menu-stat-lbl">Total Batches</div></div>
+    <div class="menu-stat"><div class="menu-stat-val">$${trueCost.toFixed(2)}</div><div class="menu-stat-lbl">True Cost</div></div>
+    <div class="menu-stat"><div class="menu-stat-val">$${avgCost.toFixed(2)}</div><div class="menu-stat-lbl">Avg / Batch</div></div>
+    <div class="menu-stat"><div class="menu-stat-val">${menu.recipes.length}</div><div class="menu-stat-lbl">Recipes</div></div>
+    </div>
+    <div class="menu-tile-recipes">${recipeNames}</div>
     </div>`;
   }).join('')}</div>`;
-}
-
-// ── MENU DETAIL ───────────────────────────────────────
-function renderDetail() {
-  const menu = state.menus.find(m => m.id === currentMenuId);
-  if (!menu) return;
-  document.getElementById('detail-title').textContent = menu.name;
-  const trueCost = menuTrueCost(menu);
-  const totalBatches = menuTotalBatches(menu);
-  const avgCost = totalBatches > 0 ? trueCost / totalBatches : 0;
-  document.getElementById('detail-stats').innerHTML = `
+            }
+            
+            // ── MENU DETAIL ───────────────────────────────────────
+            function renderDetail() {
+                const menu = state.menus.find(m => m.id === currentMenuId);
+                if (!menu) return;
+                document.getElementById('detail-title').textContent = menu.name;
+                const trueCost = menuTrueCost(menu);
+                const totalBatches = menuTotalBatches(menu);
+                const avgCost = totalBatches > 0 ? trueCost / totalBatches : 0;
+                document.getElementById('detail-stats').innerHTML = `
     <div class="detail-stat"><div class="detail-stat-val">${totalBatches}</div><div class="detail-stat-lbl">Total Batches</div></div>
     <div class="detail-stat"><div class="detail-stat-val">$${trueCost.toFixed(2)}</div><div class="detail-stat-lbl">True Cost</div></div>
     <div class="detail-stat"><div class="detail-stat-val">$${avgCost.toFixed(2)}</div><div class="detail-stat-lbl">Avg / Batch</div></div>
     <div class="detail-stat"><div class="detail-stat-val">${menu.recipes.length}</div><div class="detail-stat-lbl">Recipes</div></div>`;
-  document.getElementById('detail-recipe-list').innerHTML = menu.recipes.map(item => {
-    const rec = state.recipes.find(r => r.id === item.recipeId);
-    if (!rec) return '';
-    const ideal = recipeIdealCost(rec);
-    return `<div class="ing-row">
+    document.getElementById('detail-recipe-list').innerHTML = menu.recipes.map(item => {
+        const rec = state.recipes.find(r => r.id === item.recipeId);
+        if (!rec) return '';
+        const ideal = recipeIdealCost(rec);
+        return `<div class="ing-row">
       <span style="flex:2;font-size:0.88rem;font-weight:500">${rec.name}</span>
       <span style="font-size:0.8rem;color:var(--text-muted);font-family:var(--mono)">${item.qty} batch${item.qty !== 1 ? 'es' : ''} &nbsp;·&nbsp; $${ideal.toFixed(2)}/batch</span>
     </div>`;
-  }).join('');
-}
-function toggleDetailEdit() {
-  const panel = document.getElementById('detail-edit-panel');
-  const isOpen = panel.classList.contains('open');
-  if (!isOpen) {
-    const menu = state.menus.find(m => m.id === currentMenuId);
-    if (!menu) return;
-    document.getElementById('detail-menu-name').value = menu.name;
-    const container = document.getElementById('detail-menu-recipe-rows');
-    container.innerHTML = '';
-    menu.recipes.forEach(item => addDetailMenuRecipeRow(item.recipeId));
-  }
-  panel.classList.toggle('open');
-}
-function addDetailMenuRecipeRow(selectedRecipeId) {
-  const container = document.getElementById('detail-menu-recipe-rows');
-  const row = document.createElement('div');
-  row.className = 'ing-row';
-  row.innerHTML = `
+    }).join('');
+            }
+            function toggleDetailEdit() {
+                const panel = document.getElementById('detail-edit-panel');
+                const isOpen = panel.classList.contains('open');
+                if (!isOpen) {
+                    const menu = state.menus.find(m => m.id === currentMenuId);
+                    if (!menu) return;
+                    document.getElementById('detail-menu-name').value = menu.name;
+                    const container = document.getElementById('detail-menu-recipe-rows');
+                    container.innerHTML = '';
+                    menu.recipes.forEach(item => addDetailMenuRecipeRow(item.recipeId));
+                }
+                panel.classList.toggle('open');
+            }
+            function addDetailMenuRecipeRow(selectedRecipeId) {
+                const container = document.getElementById('detail-menu-recipe-rows');
+                const row = document.createElement('div');
+                row.className = 'ing-row';
+                row.innerHTML = `
     <select style="flex:3">${recipeOptsHTML(selectedRecipeId)}</select>
     <button class="btn-danger" style="padding:4px 8px;flex-shrink:0" onclick="this.parentElement.remove()">✕</button>`;
-  container.appendChild(row);
-}
-function saveDetailMenuEdit() {
-  const name = document.getElementById('detail-menu-name').value.trim();
-  if (!name) { alert('Menu name is required.'); return; }
-  const rows = document.querySelectorAll('#detail-menu-recipe-rows .ing-row');
-  const newRecipeIds = [];
-  rows.forEach(row => {
-    const recipeId = parseInt(row.querySelector('select').value);
-    if (recipeId) newRecipeIds.push(recipeId);
-  });
-  const menu = state.menus.find(m => m.id === currentMenuId);
-  if (menu) {
-    const existingQtys = {};
-    menu.recipes.forEach(r => existingQtys[r.recipeId] = r.qty);
-    menu.name = name;
-    menu.recipes = newRecipeIds.map(recipeId => ({ recipeId, qty: existingQtys[recipeId] || 1 }));
-  }
-  saveState();
-  document.getElementById('detail-edit-panel').classList.remove('open');
-  renderDetail();
-}
-function deleteCurrentMenu() {
-  const menu = state.menus.find(m => m.id === currentMenuId);
-  if (!menu) return;
-  if (!confirm(`Delete "${menu.name}"?`)) return;
-  state.menus = state.menus.filter(m => m.id !== currentMenuId);
-  saveState(); showGrid();
-}
-
-// ── ESTIMATOR ─────────────────────────────────────────
-function setText(id, val, extraClass) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = val;
-  el.className = 'num' + (extraClass ? ' ' + extraClass : '');
-}
-function updateQty(menuId, recipeId, val) {
-  const menu = state.menus.find(m => m.id === menuId);
-  if (!menu) return;
-  const item = menu.recipes.find(r => r.recipeId === recipeId);
-  if (item) item.qty = Math.max(0, parseInt(val) || 0);
-  saveState(); refreshEstimator(menu);
-}
-function refreshEstimator(menu) {
-  const ingUsage = calcIngUsage(menu);
-  const totalIngCost = Object.values(ingUsage).reduce((s, u) => s + u.cost, 0);
-  const totalUnitCost = Object.values(ingUsage).reduce((s, u) => s + u.unitsCost, 0);
-  const totalUnits = menu.recipes.reduce((s, i) => s + i.qty, 0);
-  setText('summ-total-units', totalUnits);
-  setText('summ-ing-cost', '$' + totalIngCost.toFixed(2));
-  setText('summ-unit-cost', '$' + totalUnitCost.toFixed(2));
-  setText('summ-avg', totalUnits ? '$' + (totalUnitCost / totalUnits).toFixed(2) : '—');
-  menu.recipes.forEach(item => {
-    const rec = state.recipes.find(r => r.id === item.recipeId);
-    if (!rec) return;
-    const ideal = recipeIdealCost(rec);
-    const actual = recipeActualCostPerUnit(rec, item.qty);
-    setText(`est-actual-${item.recipeId}`, '$' + actual.toFixed(2), actual < ideal ? 'cost-better' : '');
-    setText(`est-total-${item.recipeId}`, '$' + (actual * item.qty).toFixed(2));
-    const hintEl = document.getElementById(`est-hint-${item.recipeId}`);
-    if (hintEl) hintEl.innerHTML = sweetSpotHint(rec, item.qty);
-  });
-  const tbody = document.getElementById('ing-breakdown-body');
-  const tfoot = document.getElementById('ing-breakdown-foot');
-  if (tbody) tbody.innerHTML = Object.values(ingUsage).map(u => `
+    container.appendChild(row);
+            }
+            function saveDetailMenuEdit() {
+                const name = document.getElementById('detail-menu-name').value.trim();
+                if (!name) { alert('Menu name is required.'); return; }
+                const rows = document.querySelectorAll('#detail-menu-recipe-rows .ing-row');
+                const newRecipeIds = [];
+                rows.forEach(row => {
+                    const recipeId = parseInt(row.querySelector('select').value);
+                    if (recipeId) newRecipeIds.push(recipeId);
+                });
+                const menu = state.menus.find(m => m.id === currentMenuId);
+                if (menu) {
+                    const existingQtys = {};
+                    menu.recipes.forEach(r => existingQtys[r.recipeId] = r.qty);
+                    menu.name = name;
+                    menu.recipes = newRecipeIds.map(recipeId => ({ recipeId, qty: existingQtys[recipeId] || 1 }));
+                }
+                saveState();
+                document.getElementById('detail-edit-panel').classList.remove('open');
+                renderDetail();
+            }
+            function deleteCurrentMenu() {
+                const menu = state.menus.find(m => m.id === currentMenuId);
+                if (!menu) return;
+                if (!confirm(`Delete "${menu.name}"?`)) return;
+                state.menus = state.menus.filter(m => m.id !== currentMenuId);
+                saveState(); showGrid();
+            }
+            
+            // ── ESTIMATOR ─────────────────────────────────────────
+            function setText(id, val, extraClass) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = val;
+                el.className = 'num' + (extraClass ? ' ' + extraClass : '');
+            }
+            function updateQty(menuId, recipeId, val) {
+                const menu = state.menus.find(m => m.id === menuId);
+                if (!menu) return;
+                const item = menu.recipes.find(r => r.recipeId === recipeId);
+                if (item) item.qty = Math.max(0, parseInt(val) || 0);
+                saveState(); refreshEstimator(menu);
+            }
+            function refreshEstimator(menu) {
+                const ingUsage = calcIngUsage(menu);
+                const totalIngCost = Object.values(ingUsage).reduce((s, u) => s + u.cost, 0);
+                const totalUnitCost = Object.values(ingUsage).reduce((s, u) => s + u.unitsCost, 0);
+                const totalUnits = menu.recipes.reduce((s, i) => s + i.qty, 0);
+                setText('summ-total-units', totalUnits);
+                setText('summ-ing-cost', '$' + totalIngCost.toFixed(2));
+                setText('summ-unit-cost', '$' + totalUnitCost.toFixed(2));
+                setText('summ-avg', totalUnits ? '$' + (totalUnitCost / totalUnits).toFixed(2) : '—');
+                menu.recipes.forEach(item => {
+                    const rec = state.recipes.find(r => r.id === item.recipeId);
+                    if (!rec) return;
+                    const ideal = recipeIdealCost(rec);
+                    const actual = recipeActualCostPerUnit(rec, item.qty);
+                    setText(`est-actual-${item.recipeId}`, '$' + actual.toFixed(2), actual < ideal ? 'cost-better' : '');
+                    setText(`est-total-${item.recipeId}`, '$' + (actual * item.qty).toFixed(2));
+                    const hintEl = document.getElementById(`est-hint-${item.recipeId}`);
+                    if (hintEl) hintEl.innerHTML = sweetSpotHint(rec, item.qty);
+                });
+                const tbody = document.getElementById('ing-breakdown-body');
+                const tfoot = document.getElementById('ing-breakdown-foot');
+                if (tbody) tbody.innerHTML = Object.values(ingUsage).map(u => `
     <tr>
       <td>${u.ing.name}</td>
       <td class="num">${u.consumed.toFixed(2)} ${u.ing.uom}s</td>
@@ -774,21 +775,21 @@ function refreshEstimator(menu) {
       <td class="num">$${u.cost.toFixed(2)}</td>
       <td class="num">$${u.unitsCost.toFixed(2)}</td>
     </tr>`).join('');
-  if (tfoot) tfoot.innerHTML = `<tr><td>Total</td><td></td><td></td><td class="num">$${totalIngCost.toFixed(2)}</td><td class="num">$${totalUnitCost.toFixed(2)}</td></tr>`;
-  const recFoot = document.getElementById('rec-breakdown-foot');
-  if (recFoot) recFoot.innerHTML = `<tr><td>Total</td><td></td><td></td><td></td><td class="num">$${totalUnitCost.toFixed(2)}</td></tr>`;
-}
-function renderEstimator(menu) {
-  const ingUsage = calcIngUsage(menu);
-  const totalIngCost = Object.values(ingUsage).reduce((s, u) => s + u.cost, 0);
-  const totalUnitCost = Object.values(ingUsage).reduce((s, u) => s + u.unitsCost, 0);
-  const totalUnits = menu.recipes.reduce((s, i) => s + i.qty, 0);
-  const recipeRows = menu.recipes.map(item => {
-    const rec = state.recipes.find(r => r.id === item.recipeId);
-    if (!rec) return '';
-    const ideal = recipeIdealCost(rec);
-    const actual = recipeActualCostPerUnit(rec, item.qty);
-    return `<tr>
+    if (tfoot) tfoot.innerHTML = `<tr><td>Total</td><td></td><td></td><td class="num">$${totalIngCost.toFixed(2)}</td><td class="num">$${totalUnitCost.toFixed(2)}</td></tr>`;
+    const recFoot = document.getElementById('rec-breakdown-foot');
+    if (recFoot) recFoot.innerHTML = `<tr><td>Total</td><td></td><td></td><td></td><td class="num">$${totalUnitCost.toFixed(2)}</td></tr>`;
+            }
+            function renderEstimator(menu) {
+                const ingUsage = calcIngUsage(menu);
+                const totalIngCost = Object.values(ingUsage).reduce((s, u) => s + u.cost, 0);
+                const totalUnitCost = Object.values(ingUsage).reduce((s, u) => s + u.unitsCost, 0);
+                const totalUnits = menu.recipes.reduce((s, i) => s + i.qty, 0);
+                const recipeRows = menu.recipes.map(item => {
+                    const rec = state.recipes.find(r => r.id === item.recipeId);
+                    if (!rec) return '';
+                    const ideal = recipeIdealCost(rec);
+                    const actual = recipeActualCostPerUnit(rec, item.qty);
+                    return `<tr>
       <td>
         <div>${rec.name}</div>
         <div id="est-hint-${rec.id}">${sweetSpotHint(rec, item.qty)}</div>
@@ -798,8 +799,8 @@ function renderEstimator(menu) {
       <td class="num ${actual < ideal ? 'cost-better' : ''}" id="est-actual-${rec.id}">$${actual.toFixed(2)}</td>
       <td class="num" id="est-total-${rec.id}">$${(actual * item.qty).toFixed(2)}</td>
     </tr>`;
-  }).join('');
-  const ingRows = Object.values(ingUsage).map(u => `
+                }).join('');
+                const ingRows = Object.values(ingUsage).map(u => `
     <tr>
       <td>${u.ing.name}</td>
       <td class="num">${u.consumed.toFixed(2)} ${u.ing.uom}s</td>
@@ -807,7 +808,7 @@ function renderEstimator(menu) {
       <td class="num">$${u.cost.toFixed(2)}</td>
       <td class="num">$${u.unitsCost.toFixed(2)}</td>
     </tr>`).join('');
-  document.getElementById('estimatorContent').innerHTML = `
+    document.getElementById('estimatorContent').innerHTML = `
     <div class="summary-grid">
       <div class="summary-box"><div class="val" id="summ-total-units">${totalUnits}</div><div class="lbl">Total Batches</div></div>
       <div class="summary-box"><div class="val" id="summ-ing-cost">$${totalIngCost.toFixed(2)}</div><div class="lbl">Recipe Cost</div></div>
@@ -830,52 +831,52 @@ function renderEstimator(menu) {
         <tfoot id="ing-breakdown-foot"><tr><td>Total</td><td></td><td></td><td class="num">$${totalIngCost.toFixed(2)}</td><td class="num">$${totalUnitCost.toFixed(2)}</td></tr></tfoot>
       </table>
     </div>`;
-}
-
-// ── SHOPPING LIST ─────────────────────────────────────
-function populateShoppingSelect() {
-  const sel = document.getElementById('shop-menu-select');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— Select a menu —</option>';
-  state.menus.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.id; opt.textContent = m.name;
-    sel.appendChild(opt);
-  });
-  if (cur) sel.value = cur;
-}
-function renderShoppingList() {
-  const menuId = parseInt(document.getElementById('shop-menu-select').value);
-  const el = document.getElementById('shoppingContent');
-  if (!menuId) { el.innerHTML = `<div class="empty"><div class="empty-icon">🛒</div><strong>Select a menu</strong></div>`; return; }
-  const menu = state.menus.find(m => m.id === menuId);
-  if (!menu) return;
-  const ingUsage = calcIngUsage(menu);
-  const items = Object.values(ingUsage).map(u => ({
-    name: u.ing.name, pkgsNeeded: u.unitsOpened,
-    uom: u.ing.uom, size: u.ing.size, price: u.ing.price,
-    totalCost: u.unitsOpened * u.ing.price,
-  })).sort((a, b) => a.name.localeCompare(b.name));
-  const totalCost = items.reduce((s, i) => s + i.totalCost, 0);
-  el.innerHTML = `
-    <div class="card">
+            }
+            
+            // ── SHOPPING LIST ─────────────────────────────────────
+            function populateShoppingSelect() {
+                const sel = document.getElementById('shop-menu-select');
+                const cur = sel.value;
+                sel.innerHTML = '<option value="">— Select a menu —</option>';
+                state.menus.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id; opt.textContent = m.name;
+                    sel.appendChild(opt);
+                });
+                if (cur) sel.value = cur;
+            }
+            function renderShoppingList() {
+                const menuId = parseInt(document.getElementById('shop-menu-select').value);
+                const el = document.getElementById('shoppingContent');
+                if (!menuId) { el.innerHTML = `<div class="empty"><div class="empty-icon">🛒</div><strong>Select a menu</strong></div>`; return; }
+                const menu = state.menus.find(m => m.id === menuId);
+                if (!menu) return;
+                const ingUsage = calcIngUsage(menu);
+                const items = Object.values(ingUsage).map(u => ({
+                    name: u.ing.name, pkgsNeeded: u.unitsOpened,
+                    uom: u.ing.uom, size: u.ing.size, price: u.ing.price,
+                    totalCost: u.unitsOpened * u.ing.price,
+                })).sort((a, b) => a.name.localeCompare(b.name));
+                const totalCost = items.reduce((s, i) => s + i.totalCost, 0);
+                el.innerHTML = `
+      <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div class="section-label">${items.length} items to buy</div>
         <div style="font-family:var(--mono);font-size:0.88rem;font-weight:600;color:var(--accent)">Est. $${totalCost.toFixed(2)}</div>
       </div>
       ${items.map(i => `
-        <div class="shop-item">
-          <div>
-            <div style="font-weight:500">${i.name}</div>
-            <div style="font-size:0.75rem;color:var(--text-muted)">${i.pkgsNeeded} pkg${i.pkgsNeeded !== 1 ? 's' : ''} \u00D7 ${i.size} ${i.uom}s @ $${i.price.toFixed(2)} ea</div>
-          </div>
-          <div class="shop-qty">$${i.totalCost.toFixed(2)}</div>
-        </div>`).join('')}
+      <div class="shop-item">
+      <div>
+      <div style="font-weight:500">${i.name}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted)">${i.pkgsNeeded} pkg${i.pkgsNeeded !== 1 ? 's' : ''} \u00D7 ${i.size} ${i.uom}s @ $${i.price.toFixed(2)} ea</div>
+      </div>
+      <div class="shop-qty">$${i.totalCost.toFixed(2)}</div>
+      </div>`).join('')}
     </div>`;
-}
-
-// ── INIT ──────────────────────────────────────────────
-renderIngredients();
-</script>
-</body>
+            }
+            
+            // ── INIT ──────────────────────────────────────────────
+            renderIngredients();
+        </script>
+    </body>
 </html>
